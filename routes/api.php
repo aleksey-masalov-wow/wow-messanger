@@ -25,6 +25,7 @@ $api->version('v1', function ($api) {
 
         $api->group(['middleware' => ['jwt.auth']], function (Router $api) {
 
+            $api->post('message/send', 'PusherController@sendMessage');
 
         });
 
