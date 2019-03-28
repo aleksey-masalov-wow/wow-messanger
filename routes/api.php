@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -13,6 +11,23 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+use Dingo\Api\Routing\Router;
+
+$api = app(Router::class);
+
+$api->version('v1', function ($api) {
+
+    $api->group(['namespace' => 'App\Api\V1\Controllers'], function(Router $api) {
+
+        $api->group(['prefix' => 'auth'], function (Router $api) {
+            $api->post('login', 'LoginController@login');
+        });
+
+        $api->group(['middleware' => ['jwt.auth']], function (Router $api) {
+
+
+        });
+
+    });
+
 });
