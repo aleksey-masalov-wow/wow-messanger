@@ -2,42 +2,35 @@
 
 namespace App\Api\V1\Controllers;
 
-use App\Api\V1\Responses\Response;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Tymon\JWTAuth\JWTAuth;
-use Tymon\JWTAuth\Exceptions\JWTException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Illuminate\Contracts\Auth\Guard;
+use App\Http\Controllers\Controller;
+use App\Api\V1\Responses\Response;
 
 class LoginController extends Controller
 {
     /**
      * @param Request $request
-     * @param JWTAuth $jwtAuth
      * @return JsonResponse
      */
-    public function login(Request $request, JWTAuth $jwtAuth)
+    public function login(Request $request)
     {
-        $credentials = $request->only(['email', 'password']);
+        $credentials = $request->only('email', 'password');
 
-        if (!Auth::attempt($credentials)) {
-            return Response::error('Unauthorised', 401);
+        if ($token = $this->guard()->attempt($credentials)) {
+            return Response::get('Bearer ' . $token);
         }
 
-        try {
-            $user = Auth::user();
-            $token = $jwtAuth->fromUser($user, [implode(",", $user->toArray())]);
+        return Response::error('Email and/or password is incorrect!', 401);
+    }
 
-            if ($token) {
-                return Response::get('Bearer ' . $token);
-            }
-
-            throw new AccessDeniedHttpException();
-        } catch (JWTException $e) {
-            throw new HttpException(500);
-        }
+    /**
+     * @return Guard
+     */
+    public function guard()
+    {
+        return Auth::guard();
     }
 }

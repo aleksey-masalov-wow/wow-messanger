@@ -25,7 +25,12 @@ $api->version('v1', function ($api) {
 
         $api->group(['middleware' => ['jwt.auth']], function (Router $api) {
 
-            $api->post('message/send', 'PusherController@sendMessage');
+            $api->group(['prefix' => 'messages'], function (Router $api) {
+                $api->get('get', 'MessageController@get');
+                $api->post('create', 'MessageController@create');
+                $api->post('{id}/edit', 'MessageController@edit');
+                $api->delete('{id}/delete', 'MessageController@delete');
+            });
 
         });
 
